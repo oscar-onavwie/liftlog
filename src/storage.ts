@@ -1,5 +1,5 @@
 import { STARTER_TEMPLATES } from "./data/starterTemplates";
-import type { AppData } from "./types";
+import type { AppData, Goal, Profile } from "./types";
 
 const KEY = "liftlog:data";
 
@@ -10,6 +10,21 @@ export function freshData(): AppData {
     templates: structuredClone(STARTER_TEMPLATES),
     sessions: [],
     activeSession: null,
+    profile: { ...DEFAULT_PROFILE },
+  };
+}
+
+export const DEFAULT_PROFILE: Profile = { name: "", goal: "muscle", sessionsPerWeek: 3 };
+const GOALS: Goal[] = ["muscle", "strength", "consistency"];
+
+/** Accept whatever profile was saved, falling back to sensible values for anything missing or odd. */
+export function normalizeProfile(value: unknown): Profile {
+  const p = (value ?? {}) as Partial<Profile>;
+  const perWeek = Number(p.sessionsPerWeek);
+  return {
+    name: typeof p.name === "string" ? p.name.slice(0, 40) : DEFAULT_PROFILE.name,
+    goal: GOALS.includes(p.goal as Goal) ? (p.goal as Goal) : DEFAULT_PROFILE.goal,
+    sessionsPerWeek: Number.isInteger(perWeek) && perWeek >= 1 && perWeek <= 7 ? perWeek : DEFAULT_PROFILE.sessionsPerWeek,
   };
 }
 
@@ -27,6 +42,7 @@ export function normalizeData(value: unknown): AppData | null {
     templates: d.templates,
     sessions: Array.isArray(d.sessions) ? d.sessions : [],
     activeSession: d.activeSession ?? null,
+    profile: normalizeProfile(d.profile),
   };
 }
 
