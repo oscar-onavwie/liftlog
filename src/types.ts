@@ -96,6 +96,15 @@ export interface Session {
   reduced?: boolean;
 }
 
+export type Goal = "muscle" | "strength" | "consistency";
+
+export interface Profile {
+  name: string;
+  goal: Goal;
+  /** How many workouts per week the user is aiming for. */
+  sessionsPerWeek: number;
+}
+
 /** Everything the app saves on the phone. */
 export interface AppData {
   version: 1;
@@ -105,4 +114,5 @@ export interface AppData {
   sessions: Session[];
   /** The workout you are in the middle of, if any. */
   activeSession: ActiveSession | null;
+  profile: Profile;
 }
