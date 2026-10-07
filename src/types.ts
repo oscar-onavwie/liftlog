@@ -115,4 +115,6 @@ export interface AppData {
   /** The workout you are in the middle of, if any. */
   activeSession: ActiveSession | null;
   profile: Profile;
+  /** When the user last saved a backup file (ISO date-time). */
+  lastBackupAt?: string;
 }
