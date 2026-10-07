@@ -1,8 +1,11 @@
 :root {
   --bg: #111827;
+  --card: #1f2937;
+  --border: #374151;
   --text: #f9fafb;
   --muted: #9ca3af;
   --accent: #34d399;
+  --danger: #f87171;
 }
 
 * { box-sizing: border-box; }
@@ -12,15 +15,61 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .screen {
   max-width: 600px;
   margin: 0 auto;
-  padding: 24px 16px;
-  padding-top: max(24px, env(safe-area-inset-top));
+  padding: 16px 16px 96px;
+  padding-top: max(16px, env(safe-area-inset-top));
 }
 
-h1 { color: var(--accent); }
-.muted { color: var(--muted); }
+h1 { color: var(--accent); font-size: 1.6rem; margin: 12px 0; }
+h2 { font-size: 1rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 24px 0 8px; }
+hr { border: 0; border-top: 1px solid var(--border); margin: 24px 0; }
+.muted { color: var(--muted); font-size: 0.9rem; }
+.notice { background: #422006; border: 1px solid #92400e; border-radius: 8px; padding: 10px 12px; }
+
+button, select, input {
+  font: inherit;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  min-height: 44px; /* big enough to tap comfortably */
+}
+button { cursor: pointer; }
+button:disabled { opacity: 0.35; cursor: default; }
+button.primary { background: var(--accent); color: #052e1f; border-color: var(--accent); font-weight: 600; }
+button.danger { color: var(--danger); border-color: var(--danger); background: transparent; }
+button.small { padding: 4px 12px; min-width: 44px; }
+button.wide { width: 100%; margin: 12px 0; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin: 12px 0; }
+.card button, .card select, .card input { background: var(--bg); }
+.form label { display: block; margin-bottom: 12px; }
+.form input:not([type="checkbox"]), .form select, .card select { display: block; width: 100%; margin-top: 4px; }
+.check { display: flex; align-items: center; gap: 10px; }
+.check input { min-height: 0; width: 22px; height: 22px; }
+
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.between { justify-content: space-between; flex-wrap: nowrap; }
+.stepper { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.stepper .muted { flex: 1; }
+.stepper strong { min-width: 28px; text-align: center; font-size: 1.1rem; }
+
+.list { list-style: none; padding: 0; margin: 0; }
+.list li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.row-button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; text-align: left; }
+
+.title-input { width: 100%; font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  display: flex; background: var(--card); border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabbar button { flex: 1; border: 0; border-radius: 0; background: transparent; color: var(--muted); padding: 16px 0; }
+.tabbar button.active { color: var(--accent); font-weight: 700; }
