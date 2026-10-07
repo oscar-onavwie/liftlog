@@ -97,6 +97,10 @@ Explicitly NOT in MVP: social, payments, messaging, nutrition, wearables, AI cha
   Strength chart plots an *estimated best single lift* (Epley: weight x (1 + reps/30)) because double progression keeps weight flat while reps rise. The line joins normal days only; low-energy days are separate indigo dots so they never look like regressions.
   Chart colours (normal #12a874, low-energy #7480f2) passed the dataviz palette validator on the dark card surface; every chart has a "View as table". Weeks start on Monday.
   Simplifications: weights are kg only (no lb setting yet); `goal` is stored and shown but does not change recommendations yet.
+- M7 built: Backup & data card at the bottom of the Progress tab (`src/backup.ts`, `src/components/BackupCard.tsx`). Save backup file (dated .json download, plus a Share button where the phone supports sharing files),
+  Restore from file (strict validation, preview + confirmation, replaces everything, never throws; bad files are refused with a reason), Clear workout history (keeps templates, custom exercises, profile).
+  `AppData.lastBackupAt` drives a nudge on Today (3+ workouts and no backup in 14 days). Backup file = `{app:"liftlog", formatVersion:1, exportedAt, data}`.
+  **The MVP is feature-complete.** Next: the 4-week test in `docs/FOUR_WEEK_TEST.md` (no new features during the test; wishlist only).
 - Owner has authorised merging each milestone's PR to main without asking again (tell them what went live).
 
 ## Working agreements with the owner

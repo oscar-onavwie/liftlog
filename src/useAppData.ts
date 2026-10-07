@@ -16,5 +16,8 @@ export function useAppData() {
     [data.customExercises]
   );
 
-  return { data, update, exercises };
+  /** Swap in a whole new set of data (used when restoring a backup). */
+  const replaceAll = useCallback((next: AppData) => setData(next), []);
+
+  return { data, update, exercises, replaceAll };
 }

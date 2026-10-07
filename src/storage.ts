@@ -43,6 +43,7 @@ export function normalizeData(value: unknown): AppData | null {
     sessions: Array.isArray(d.sessions) ? d.sessions : [],
     activeSession: d.activeSession ?? null,
     profile: normalizeProfile(d.profile),
+    ...(typeof d.lastBackupAt === "string" && !Number.isNaN(Date.parse(d.lastBackupAt)) ? { lastBackupAt: d.lastBackupAt } : {}),
   };
 }
 

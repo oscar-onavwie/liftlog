@@ -9,15 +9,15 @@ import { useAppData } from "./useAppData";
 type Tab = "today" | "history" | "progress" | "workouts" | "exercises";
 
 export function App() {
-  const { data, update, exercises } = useAppData();
+  const { data, update, exercises, replaceAll } = useAppData();
   const [tab, setTab] = useState<Tab>("today");
 
   return (
     <>
       <main className="screen">
-        {tab === "today" && <TodayScreen data={data} exercises={exercises} update={update} />}
+        {tab === "today" && <TodayScreen data={data} exercises={exercises} update={update} onBackup={() => { setTab("progress"); setTimeout(() => document.getElementById("backup")?.scrollIntoView(), 50); }} />}
         {tab === "history" && <HistoryScreen data={data} exercises={exercises} update={update} />}
-        {tab === "progress" && <ProgressScreen data={data} exercises={exercises} update={update} />}
+        {tab === "progress" && <ProgressScreen data={data} exercises={exercises} update={update} replaceAll={replaceAll} />}
         {tab === "workouts" && <WorkoutsScreen data={data} exercises={exercises} update={update} />}
         {tab === "exercises" && <ExercisesScreen data={data} exercises={exercises} update={update} />}
       </main>
