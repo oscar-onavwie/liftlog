@@ -95,3 +95,12 @@ button.wide { width: 100%; margin: 12px 0; }
 .goal.hold strong, .goal.reduce strong, .goal.return strong { color: #fcd34d; }
 .goal.first-time { background: var(--bg); border-color: var(--border); }
 .goal.first-time strong { color: var(--text); }
+
+/* How are you feeling? */
+.feelings { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.feelings button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; font-size: 0.75rem; }
+.feelings .emoji { font-size: 1.6rem; line-height: 1; }
+.feelings button.selected { border-color: var(--accent); background: #064e3b; color: #6ee7b7; font-weight: 700; }
+.feeling-blurb { min-height: 3.2em; }
+.banner { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; margin-bottom: 8px; }
+.banner.low { background: #1e1b4b; border-color: #4338ca; color: #c7d2fe; }

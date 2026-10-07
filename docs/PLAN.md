@@ -88,6 +88,10 @@ Explicitly NOT in MVP: social, payments, messaging, nutrition, wearables, AI cha
   "all sets equal" → target +1 rep; two tough sessions in a row at the same weight → -5% (rounded to the exercise's step, always at least one step); after a drop, target is the middle of the range;
   gap is measured from the last session of that exercise (reduced or not). `Session.reduced` exists and is ignored by the engine; Milestone 5 will set it.
   Known simplification: "total reps clearly down" is not a separate rule; only a set under the bottom of the range counts as a tough session.
+- M5 built: readiness check-in on Today (required before starting). `src/readiness.ts` shapes the workout: Tired = one fewer set each (never below 2, never above planned), same weight, no increase, match last time;
+  Exhausted = first 2-3 big lifts in template order (tops up from the first exercises if <2 big lifts), max 2 sets each, ~10% lighter than the normal recommendation (rounded to the exercise's step), message says to leave 2+ reps in the tank.
+  Tired/Exhausted sessions are saved with `readiness` and `reduced: true`; the engine ignores reduced sessions, so a low-energy day never changes later targets. History shows the emoji and an explanation.
+  Open question for real use: Tired days at full weight don't count towards progression either (by design); revisit if it feels like lost progress.
 - Owner has authorised merging each milestone's PR to main without asking again (tell them what went live).
 
 ## Working agreements with the owner
