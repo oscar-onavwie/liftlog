@@ -36,11 +36,23 @@ export interface DraftSet {
   done: boolean;
 }
 
+/** What the app suggested for this exercise when the workout started. */
+export interface Recommendation {
+  kind: "first-time" | "increase" | "build" | "hold" | "reduce" | "return";
+  /** null when there is no history to base a weight on. */
+  weightKg: number | null;
+  /** Reps to aim for on every set. */
+  targetReps: number;
+  /** One plain-English sentence explaining why. */
+  message: string;
+}
+
 export interface DraftExercise {
   exerciseId: string;
   repMin: number;
   repMax: number;
   sets: DraftSet[];
+  recommendation?: Recommendation;
 }
 
 export interface ActiveSession {
@@ -74,6 +86,8 @@ export interface Session {
   startedAt: string;
   finishedAt: string;
   exercises: SessionExercise[];
+  /** True for a deliberately lighter workout (low-energy day). Ignored when judging progress. */
+  reduced?: boolean;
 }
 
 /** Everything the app saves on the phone. */
