@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  addSet, countDoneSets, describeSets, finishSession, isSetComplete, lastPerformance,
+  addSet, countDoneSets, describeSets, finishSession, formatKg, isSetComplete, lastPerformance,
   nextTemplate, removeLastSet, setField, startSession, toggleDone, totalVolumeKg,
 } from "../sessions";
 import type { ActiveSession, AppData, Exercise, Session } from "../types";
@@ -51,7 +51,7 @@ export function TodayScreen({ data, exercises, update }: Props) {
               <button
                 key={t.id}
                 className={`wide ${t.id === next?.id ? "primary" : ""}`}
-                onClick={() => setActive(startSession(t, data.sessions, new Date()))}
+                onClick={() => setActive(startSession(t, data.sessions, exercises, new Date()))}
                 disabled={t.exercises.length === 0}
               >
                 {t.id === next?.id ? `▶ Start ${t.name} (up next)` : `Start ${t.name}`}
@@ -85,8 +85,18 @@ export function TodayScreen({ data, exercises, update }: Props) {
         return (
           <div className="card" key={`${de.exerciseId}-${ei}`}>
             <strong>{exercise?.name ?? "(exercise no longer exists)"}</strong>
-            <div className="muted">Goal: {de.sets.length} sets of {de.repMin}–{de.repMax} reps</div>
+            <div className="muted">Plan: {de.sets.length} sets of {de.repMin}–{de.repMax} reps</div>
             <div className="muted">{last ? `Last time: ${describeSets(last)}` : "Last time: first time doing this"}</div>
+            {de.recommendation && (
+              <div className={`goal ${de.recommendation.kind}`}>
+                <strong>
+                  {de.recommendation.weightKg === null
+                    ? "Today's goal: you choose the weight"
+                    : `Today's goal: ${formatKg(de.recommendation.weightKg)} kg × ${de.recommendation.targetReps} reps, every set`}
+                </strong>
+                <div>{de.recommendation.message}</div>
+              </div>
+            )}
 
             <div className="setgrid head muted"><span>Set</span><span>kg</span><span>Reps</span><span /></div>
             {de.sets.map((s, si) => (
@@ -102,7 +112,7 @@ export function TodayScreen({ data, exercises, update }: Props) {
                 <input
                   inputMode="numeric"
                   value={s.reps}
-                  placeholder="reps"
+                  placeholder={de.recommendation ? String(de.recommendation.targetReps) : "reps"}
                   aria-label={`Set ${si + 1} reps`}
                   onChange={(e) => setActive(setField(active, ei, si, "reps", e.target.value))}
                 />

@@ -1,7 +1,9 @@
+import { recommend } from "./progression";
 import type {
   ActiveSession,
   DraftExercise,
   DraftSet,
+  Exercise,
   LoggedSet,
   Session,
   Template,
@@ -51,22 +53,34 @@ export function nextTemplate(templates: Template[], sessions: Session[]): Templa
   return templates[(i + 1) % templates.length];
 }
 
-/** Begin a workout from a template. Weights start as last time's weights, reps start empty. */
-export function startSession(template: Template, sessions: Session[], now: Date): ActiveSession {
-  const exercises: DraftExercise[] = template.exercises.map((te) => {
-    const last = lastPerformance(sessions, te.exerciseId);
-    const sets: DraftSet[] = Array.from({ length: te.sets }, (_, i) => {
-      const previous = last ? (last[i] ?? last[last.length - 1]) : undefined;
-      return { weight: previous ? formatKg(previous.weightKg) : "", reps: "", done: false };
+/** Begin a workout from a template. Each exercise gets a recommended weight (pre-filled) and rep goal. */
+export function startSession(
+  template: Template,
+  sessions: Session[],
+  exercises: Exercise[],
+  now: Date
+): ActiveSession {
+  const stepFor = (id: string) => exercises.find((e) => e.id === id)?.stepKg ?? 2.5;
+  const drafts: DraftExercise[] = template.exercises.map((te) => {
+    const recommendation = recommend({
+      exerciseId: te.exerciseId,
+      stepKg: stepFor(te.exerciseId),
+      sets: te.sets,
+      repMin: te.repMin,
+      repMax: te.repMax,
+      sessions,
+      now,
     });
-    return { exerciseId: te.exerciseId, repMin: te.repMin, repMax: te.repMax, sets };
+    const weight = recommendation.weightKg === null ? "" : formatKg(recommendation.weightKg);
+    const sets: DraftSet[] = Array.from({ length: te.sets }, () => ({ weight, reps: "", done: false }));
+    return { exerciseId: te.exerciseId, repMin: te.repMin, repMax: te.repMax, sets, recommendation };
   });
   return {
     id: `s-${now.getTime().toString(36)}`,
     templateId: template.id,
     templateName: template.name,
     startedAt: now.toISOString(),
-    exercises,
+    exercises: drafts,
   };
 }
 
