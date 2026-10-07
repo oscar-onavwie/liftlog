@@ -48,14 +48,23 @@ describe("which workout is next", () => {
 
 describe("running a workout", () => {
   it("starts with last time's weights and empty reps", () => {
-    const s = startSession(A, [past("a", "bench", [[66, 8], [66, 7]])], NOW);
+    const s = startSession(A, [past("a", "bench", [[66, 8], [66, 7]])], [], NOW);
     expect(s.exercises[0]!.sets.map((x) => x.weight)).toEqual(["66", "66", "66"]);
     expect(s.exercises[0]!.sets.every((x) => x.reps === "" && !x.done)).toBe(true);
-    expect(startSession(A, [], NOW).exercises[0]!.sets[0]!.weight).toBe("");
+    expect(startSession(A, [], [], NOW).exercises[0]!.sets[0]!.weight).toBe("");
+  });
+
+  it("pre-fills the recommended weight and stores the recommendation", () => {
+    const bench = { id: "bench", name: "Bench", muscle: "chest" as const, equipment: "barbell" as const, compound: true, stepKg: 2.5 };
+    const hitTop = [past("a", "bench", [[66, 8], [66, 8], [66, 8]])];
+    const s = startSession(A, hitTop, [bench], NOW);
+    expect(s.exercises[0]!.recommendation).toMatchObject({ kind: "increase", weightKg: 68.5, targetReps: 6 });
+    expect(s.exercises[0]!.sets.map((x) => x.weight)).toEqual(["68.5", "68.5", "68.5"]);
+    expect(s.exercises[0]!.sets.every((x) => x.reps === "")).toBe(true); // reps are never pre-filled
   });
 
   it("only ticks complete sets, and editing un-ticks", () => {
-    let s = startSession(A, [], NOW);
+    let s = startSession(A, [], [], NOW);
     expect(toggleDone(s, 0, 0).exercises[0]!.sets[0]!.done).toBe(false); // empty: refused
     s = setField(setField(s, 0, 0, "weight", "66,5"), 0, 0, "reps", "8");
     expect(isSetComplete(s.exercises[0]!.sets[0]!)).toBe(true);
@@ -68,7 +77,7 @@ describe("running a workout", () => {
   });
 
   it("adds sets copying the weight and removes the last, keeping at least one", () => {
-    let s = startSession(A, [past("a", "bench", [[66, 8]])], NOW);
+    let s = startSession(A, [past("a", "bench", [[66, 8]])], [], NOW);
     s = addSet(s, 0);
     expect(s.exercises[0]!.sets).toHaveLength(4);
     expect(s.exercises[0]!.sets[3]!.weight).toBe("66");
@@ -78,7 +87,7 @@ describe("running a workout", () => {
 
   it("finishing keeps only ticked sets and drops empty exercises", () => {
     const two: Template = { ...A, exercises: [...A.exercises, { exerciseId: "row", sets: 2, repMin: 8, repMax: 10 }] };
-    let s = startSession(two, [], NOW);
+    let s = startSession(two, [], [], NOW);
     s = setField(setField(s, 0, 0, "weight", "66"), 0, 0, "reps", "8");
     s = toggleDone(s, 0, 0);
     s = setField(setField(s, 0, 1, "weight", "66"), 0, 1, "reps", "7"); // typed but not ticked
@@ -87,11 +96,11 @@ describe("running a workout", () => {
     expect(done.exercises).toHaveLength(1);
     expect(done.exercises[0]).toMatchObject({ exerciseId: "bench", targetSets: 3, sets: [{ weightKg: 66, reps: 8 }] });
     expect(totalVolumeKg(done)).toBe(528);
-    expect(finishSession(startSession(A, [], NOW), NOW)).toBeNull();
+    expect(finishSession(startSession(A, [], [], NOW), NOW)).toBeNull();
   });
 
   it("never changes the original", () => {
-    const s = startSession(A, [], NOW);
+    const s = startSession(A, [], [], NOW);
     const copy = structuredClone(s);
     setField(s, 0, 0, "reps", "5"); addSet(s, 0); removeLastSet(s, 0); toggleDone(s, 0, 0);
     expect(s).toEqual(copy);

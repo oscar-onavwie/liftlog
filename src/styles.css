@@ -87,3 +87,11 @@ button.wide { width: 100%; margin: 12px 0; }
 /* History */
 .histset { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); }
 .tabbar button { padding-left: 0; padding-right: 0; font-size: 0.95rem; }
+
+/* Today's goal box */
+.goal { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: #064e3b; border: 1px solid #065f46; font-size: 0.95rem; }
+.goal strong { display: block; color: #6ee7b7; }
+.goal.hold, .goal.reduce, .goal.return { background: #422006; border-color: #92400e; }
+.goal.hold strong, .goal.reduce strong, .goal.return strong { color: #fcd34d; }
+.goal.first-time { background: var(--bg); border-color: var(--border); }
+.goal.first-time strong { color: var(--text); }

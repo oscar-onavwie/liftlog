@@ -82,6 +82,12 @@ Explicitly NOT in MVP: social, payments, messaging, nutrition, wearables, AI cha
 - M1 built: exercise library, starter templates (Full Body A/B), template editor, custom exercises. Data is saved in the phone's localStorage under `liftlog:data`.
 - M2 built: Today tab (start a workout, log weight/reps per set, finish/cancel). A workout in progress is saved (`activeSession`) so closing the app loses nothing; finished workouts go to `sessions`. Weight/reps are kept as text while typing and converted on finish.
 - M3 built: History tab (newest first, tap for set-by-set detail, delete with confirmation).
+- M4 built: progression engine (`src/progression.ts`, tested) wired into Today: each exercise gets a "Today's goal" (weight, reps, one-sentence reason), weight pre-filled, reps never pre-filled.
+  Implementation details of the rules: judged on the most recent non-"reduced" session; the "working weight" is the heaviest weight used (lighter sets = warm-ups/drop sets, ignored);
+  an increase needs all planned sets at the top of the range; doing fewer sets than planned blocks an increase; after an increase the target is the bottom of the range;
+  "all sets equal" → target +1 rep; two tough sessions in a row at the same weight → -5% (rounded to the exercise's step, always at least one step); after a drop, target is the middle of the range;
+  gap is measured from the last session of that exercise (reduced or not). `Session.reduced` exists and is ignored by the engine; Milestone 5 will set it.
+  Known simplification: "total reps clearly down" is not a separate rule; only a set under the bottom of the range counts as a tough session.
 - Owner has authorised merging each milestone's PR to main without asking again (tell them what went live).
 
 ## Working agreements with the owner
