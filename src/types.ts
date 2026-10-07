@@ -27,9 +27,62 @@ export interface Template {
   exercises: TemplateExercise[];
 }
 
+// ---- A workout in progress ("draft") -------------------------------------------------
+// While you are typing, weight and reps are kept as text so that things like "66." work.
+
+export interface DraftSet {
+  weight: string;
+  reps: string;
+  done: boolean;
+}
+
+export interface DraftExercise {
+  exerciseId: string;
+  repMin: number;
+  repMax: number;
+  sets: DraftSet[];
+}
+
+export interface ActiveSession {
+  id: string;
+  templateId: string;
+  templateName: string;
+  startedAt: string; // ISO date-time
+  exercises: DraftExercise[];
+}
+
+// ---- A finished workout (saved in history) ------------------------------------------
+
+export interface LoggedSet {
+  weightKg: number;
+  reps: number;
+}
+
+export interface SessionExercise {
+  exerciseId: string;
+  repMin: number;
+  repMax: number;
+  /** How many sets the template asked for (you may have done more or fewer). */
+  targetSets: number;
+  sets: LoggedSet[];
+}
+
+export interface Session {
+  id: string;
+  templateId: string;
+  templateName: string;
+  startedAt: string;
+  finishedAt: string;
+  exercises: SessionExercise[];
+}
+
 /** Everything the app saves on the phone. */
 export interface AppData {
   version: 1;
   customExercises: Exercise[];
   templates: Template[];
+  /** Finished workouts, oldest first. */
+  sessions: Session[];
+  /** The workout you are in the middle of, if any. */
+  activeSession: ActiveSession | null;
 }

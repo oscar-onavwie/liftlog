@@ -4,17 +4,30 @@ import type { AppData } from "./types";
 const KEY = "liftlog:data";
 
 export function freshData(): AppData {
-  return { version: 1, customExercises: [], templates: structuredClone(STARTER_TEMPLATES) };
+  return {
+    version: 1,
+    customExercises: [],
+    templates: structuredClone(STARTER_TEMPLATES),
+    sessions: [],
+    activeSession: null,
+  };
 }
 
-function isValid(value: unknown): value is AppData {
-  const d = value as AppData;
-  return (
-    !!d &&
-    d.version === 1 &&
-    Array.isArray(d.customExercises) &&
-    Array.isArray(d.templates)
-  );
+/**
+ * Turn whatever was saved into valid app data. Data saved by older versions of the app
+ * (which lack newer fields) is upgraded by filling in the missing pieces. Returns null if unusable.
+ */
+export function normalizeData(value: unknown): AppData | null {
+  const d = value as Partial<AppData> | null;
+  if (!d || typeof d !== "object" || d.version !== 1) return null;
+  if (!Array.isArray(d.customExercises) || !Array.isArray(d.templates)) return null;
+  return {
+    version: 1,
+    customExercises: d.customExercises,
+    templates: d.templates,
+    sessions: Array.isArray(d.sessions) ? d.sessions : [],
+    activeSession: d.activeSession ?? null,
+  };
 }
 
 /** Read saved data from the phone. If nothing (or something broken) is there, start fresh. */
@@ -22,8 +35,8 @@ export function loadData(): AppData {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
-      const parsed: unknown = JSON.parse(raw);
-      if (isValid(parsed)) return parsed;
+      const data = normalizeData(JSON.parse(raw));
+      if (data) return data;
     }
   } catch {
     // Storage blocked or data unreadable: fall through to fresh data.
