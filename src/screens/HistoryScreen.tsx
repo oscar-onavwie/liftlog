@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { countSets, durationMinutes, formatDay, formatTime, newestFirst, removeSession } from "../history";
+import { optionFor } from "../readiness";
 import { describeSets, totalVolumeKg } from "../sessions";
 import type { AppData, Exercise } from "../types";
 
@@ -25,6 +26,12 @@ export function HistoryScreen({ data, exercises, update }: Props) {
           {formatDay(open.startedAt)} · {formatTime(open.startedAt)} · {durationMinutes(open)} min ·{" "}
           {Math.round(totalVolumeKg(open)).toLocaleString()} kg lifted
         </p>
+        {open.readiness && (
+          <p className="muted">
+            Felt {optionFor(open.readiness).label.toLowerCase()} {optionFor(open.readiness).emoji}
+            {open.reduced && " · low-energy day (not used to judge your progress)"}
+          </p>
+        )}
         {open.exercises.map((e, i) => (
           <div className="card" key={`${e.exerciseId}-${i}`}>
             <strong>{byId.get(e.exerciseId)?.name ?? "(exercise no longer exists)"}</strong>
@@ -74,7 +81,7 @@ export function HistoryScreen({ data, exercises, update }: Props) {
             {sessions.map((s) => (
               <li key={s.id}>
                 <button className="row-button" onClick={() => setOpenId(s.id)}>
-                  <strong>{s.templateName}</strong>
+                  <strong>{s.readiness ? `${optionFor(s.readiness).emoji} ` : ""}{s.templateName}</strong>
                   <span className="muted">
                     {formatDay(s.startedAt)} · {countSets(s)} sets · {durationMinutes(s)} min
                   </span>

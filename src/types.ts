@@ -27,6 +27,8 @@ export interface Template {
   exercises: TemplateExercise[];
 }
 
+export type Readiness = "strong" | "good" | "average" | "tired" | "exhausted";
+
 // ---- A workout in progress ("draft") -------------------------------------------------
 // While you are typing, weight and reps are kept as text so that things like "66." work.
 
@@ -61,6 +63,8 @@ export interface ActiveSession {
   templateName: string;
   startedAt: string; // ISO date-time
   exercises: DraftExercise[];
+  /** How the user said they felt when starting. Missing on workouts started by older app versions. */
+  readiness?: Readiness;
 }
 
 // ---- A finished workout (saved in history) ------------------------------------------
@@ -86,6 +90,8 @@ export interface Session {
   startedAt: string;
   finishedAt: string;
   exercises: SessionExercise[];
+  /** How the user said they felt when starting. */
+  readiness?: Readiness;
   /** True for a deliberately lighter workout (low-energy day). Ignored when judging progress. */
   reduced?: boolean;
 }

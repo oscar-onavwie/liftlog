@@ -1,10 +1,12 @@
-import { recommend } from "./progression";
+import { lighter, recommend } from "./progression";
+import { isReduced, planWorkout } from "./readiness";
 import type {
   ActiveSession,
   DraftExercise,
   DraftSet,
   Exercise,
   LoggedSet,
+  Readiness,
   Session,
   Template,
 } from "./types";
@@ -53,16 +55,20 @@ export function nextTemplate(templates: Template[], sessions: Session[]): Templa
   return templates[(i + 1) % templates.length];
 }
 
-/** Begin a workout from a template. Each exercise gets a recommended weight (pre-filled) and rep goal. */
+/**
+ * Begin a workout from a template, adapted to how the user feels.
+ * Each exercise gets a recommended weight (pre-filled) and a rep goal.
+ */
 export function startSession(
   template: Template,
   sessions: Session[],
   exercises: Exercise[],
-  now: Date
+  now: Date,
+  readiness: Readiness = "average"
 ): ActiveSession {
   const stepFor = (id: string) => exercises.find((e) => e.id === id)?.stepKg ?? 2.5;
-  const drafts: DraftExercise[] = template.exercises.map((te) => {
-    const recommendation = recommend({
+  const drafts: DraftExercise[] = planWorkout(template, exercises, readiness).map((te) => {
+    let recommendation = recommend({
       exerciseId: te.exerciseId,
       stepKg: stepFor(te.exerciseId),
       sets: te.sets,
@@ -70,7 +76,17 @@ export function startSession(
       repMax: te.repMax,
       sessions,
       now,
+      easyDay: isReduced(readiness),
     });
+    if (readiness === "exhausted" && recommendation.weightKg !== null) {
+      // Minimum effective workout: about 10% lighter than usual, and stop with reps to spare.
+      const lightKg = lighter(recommendation.weightKg, 0.1, stepFor(te.exerciseId));
+      recommendation = {
+        ...recommendation,
+        weightKg: lightKg,
+        message: `Exhausted day: ${formatKg(lightKg)} kg (a bit lighter than usual), ${te.sets} sets. Stop each set with 2 or more reps left in the tank.`,
+      };
+    }
     const weight = recommendation.weightKg === null ? "" : formatKg(recommendation.weightKg);
     const sets: DraftSet[] = Array.from({ length: te.sets }, () => ({ weight, reps: "", done: false }));
     return { exerciseId: te.exerciseId, repMin: te.repMin, repMax: te.repMax, sets, recommendation };
@@ -81,6 +97,7 @@ export function startSession(
     templateName: template.name,
     startedAt: now.toISOString(),
     exercises: drafts,
+    readiness,
   };
 }
 
@@ -173,6 +190,8 @@ export function finishSession(session: ActiveSession, now: Date): Session | null
     startedAt: session.startedAt,
     finishedAt: now.toISOString(),
     exercises,
+    ...(session.readiness ? { readiness: session.readiness } : {}),
+    ...(session.readiness && isReduced(session.readiness) ? { reduced: true } : {}),
   };
 }
 

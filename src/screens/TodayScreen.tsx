@@ -3,7 +3,8 @@ import {
   addSet, countDoneSets, describeSets, finishSession, formatKg, isSetComplete, lastPerformance,
   nextTemplate, removeLastSet, setField, startSession, toggleDone, totalVolumeKg,
 } from "../sessions";
-import type { ActiveSession, AppData, Exercise, Session } from "../types";
+import { READINESS_OPTIONS, isReduced, optionFor } from "../readiness";
+import type { ActiveSession, AppData, Exercise, Readiness, Session } from "../types";
 
 interface Props {
   data: AppData;
@@ -13,6 +14,7 @@ interface Props {
 
 export function TodayScreen({ data, exercises, update }: Props) {
   const [summary, setSummary] = useState<Session | null>(null);
+  const [feeling, setFeeling] = useState<Readiness | null>(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const active = data.activeSession;
   const byId = new Map(exercises.map((e) => [e.id, e]));
@@ -30,6 +32,12 @@ export function TodayScreen({ data, exercises, update }: Props) {
           <p className="muted">
             {sets} sets · {summary.exercises.length} exercises · {Math.round(totalVolumeKg(summary)).toLocaleString()} kg lifted in total
           </p>
+          {summary.reduced && (
+            <p>
+              You trained on a low-energy day. That is exactly the right call. This session won't count against your
+              progress, and your next targets are based on your last normal session.
+            </p>
+          )}
         </div>
         <button className="primary wide" onClick={() => setSummary(null)}>Done</button>
       </section>
@@ -42,21 +50,43 @@ export function TodayScreen({ data, exercises, update }: Props) {
     return (
       <section>
         <h1>Today</h1>
+        <h2>How are you feeling?</h2>
+        <div className="feelings" role="group" aria-label="How are you feeling?">
+          {READINESS_OPTIONS.map((o) => (
+            <button
+              key={o.id}
+              className={feeling === o.id ? "selected" : ""}
+              aria-pressed={feeling === o.id}
+              onClick={() => setFeeling(o.id)}
+            >
+              <span className="emoji">{o.emoji}</span>
+              <span>{o.label}</span>
+            </button>
+          ))}
+        </div>
+        <p className="muted feeling-blurb">
+          {feeling ? optionFor(feeling).blurb : "Tap one. Your workout adjusts to match."}
+        </p>
+
         {data.templates.length === 0 ? (
           <p>You have no saved workouts yet. Create one on the Workouts tab.</p>
         ) : (
           <>
-            <p className="muted">Pick a workout to start.</p>
+            <h2>Pick a workout</h2>
             {data.templates.map((t) => (
               <button
                 key={t.id}
                 className={`wide ${t.id === next?.id ? "primary" : ""}`}
-                onClick={() => setActive(startSession(t, data.sessions, exercises, new Date()))}
-                disabled={t.exercises.length === 0}
+                onClick={() => {
+                  setActive(startSession(t, data.sessions, exercises, new Date(), feeling!));
+                  setFeeling(null);
+                }}
+                disabled={t.exercises.length === 0 || feeling === null}
               >
                 {t.id === next?.id ? `▶ Start ${t.name} (up next)` : `Start ${t.name}`}
               </button>
             ))}
+            {feeling === null && <p className="muted">Pick how you feel first, then start.</p>}
           </>
         )}
       </section>
@@ -77,6 +107,13 @@ export function TodayScreen({ data, exercises, update }: Props) {
   return (
     <section>
       <h1>{active.templateName}</h1>
+      {active.readiness && (
+        <div className={`banner ${isReduced(active.readiness) ? "low" : ""}`}>
+          {optionFor(active.readiness).emoji} Feeling {optionFor(active.readiness).label.toLowerCase()}
+          {active.readiness === "exhausted" && " · minimum effective workout, about 20 minutes"}
+          {active.readiness === "tired" && " · lighter session, no weight jumps"}
+        </div>
+      )}
       <p className="muted">Fill in weight and reps, then tap ✓ for each set you finish.</p>
 
       {active.exercises.map((de, ei) => {
