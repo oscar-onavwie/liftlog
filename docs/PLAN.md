@@ -77,6 +77,10 @@ Explicitly NOT in MVP: social, payments, messaging, nutrition, wearables, AI cha
 - Would a friend still be using it in week 3 without me nagging them?
 - Which single feature did they actually touch?
 
+## Status
+- M0 done (live on GitHub Pages: https://oscar-onavwie.github.io/liftlog/).
+- M1 built: exercise library, starter templates (Full Body A/B), template editor, custom exercises. Data is saved in the phone's localStorage under `liftlog:data`.
+
 ## Working agreements with the owner
 - Beginner, works from a phone. Explain before changing. One small change at a time. Give exact test steps.
 - Avoid jargon; define any term the first time it is used.
