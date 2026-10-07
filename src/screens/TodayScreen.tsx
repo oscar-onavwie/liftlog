@@ -49,7 +49,7 @@ export function TodayScreen({ data, exercises, update }: Props) {
     const next = nextTemplate(data.templates, data.sessions);
     return (
       <section>
-        <h1>Today</h1>
+        <h1>{data.profile.name ? `Hey ${data.profile.name}` : "Today"}</h1>
         <h2>How are you feeling?</h2>
         <div className="feelings" role="group" aria-label="How are you feeling?">
           {READINESS_OPTIONS.map((o) => (

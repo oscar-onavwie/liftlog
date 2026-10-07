@@ -92,6 +92,11 @@ Explicitly NOT in MVP: social, payments, messaging, nutrition, wearables, AI cha
   Exhausted = first 2-3 big lifts in template order (tops up from the first exercises if <2 big lifts), max 2 sets each, ~10% lighter than the normal recommendation (rounded to the exercise's step), message says to leave 2+ reps in the tank.
   Tired/Exhausted sessions are saved with `readiness` and `reduced: true`; the engine ignores reduced sessions, so a low-energy day never changes later targets. History shows the emoji and an explanation.
   Open question for real use: Tired days at full weight don't count towards progression either (by design); revisit if it feels like lost progress.
+- M6 built: Progress tab (`src/screens/ProgressScreen.tsx`, `src/stats.ts`, `src/components/{WeeklyChart,StrengthChart}.tsx`) and `AppData.profile` (name, goal, sessionsPerWeek 1-7; defaults filled in for older saved data).
+  Hero = workouts this week vs target; tiles = workouts logged and low-energy days trained (the key metric for the hypothesis); weekly stacked bars (normal vs low-energy) with a target line; per-exercise strength chart.
+  Strength chart plots an *estimated best single lift* (Epley: weight x (1 + reps/30)) because double progression keeps weight flat while reps rise. The line joins normal days only; low-energy days are separate indigo dots so they never look like regressions.
+  Chart colours (normal #12a874, low-energy #7480f2) passed the dataviz palette validator on the dark card surface; every chart has a "View as table". Weeks start on Monday.
+  Simplifications: weights are kg only (no lb setting yet); `goal` is stored and shown but does not change recommendations yet.
 - Owner has authorised merging each milestone's PR to main without asking again (tell them what went live).
 
 ## Working agreements with the owner
