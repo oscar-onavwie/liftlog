@@ -21,6 +21,8 @@ export interface RecommendInput {
   /** All finished workouts, oldest first */
   sessions: Session[];
   now: Date;
+  /** Low-energy day: never suggest a weight increase and don't ask for more reps than last time. */
+  easyDay?: boolean;
 }
 
 interface Performance {
@@ -49,13 +51,13 @@ function workingSets(sets: LoggedSet[]): { weight: number; reps: number[] } {
 }
 
 /** A lower weight than `weight`: about `fraction` lighter, but always at least one step lighter. */
-function lighter(weight: number, fraction: number, step: number): number {
+export function lighter(weight: number, fraction: number, step: number): number {
   const target = roundToStep(weight * (1 - fraction), step);
   return Math.max(0, target < weight ? target : round2(weight - step));
 }
 
 export function recommend(input: RecommendInput): Recommendation {
-  const { stepKg, sets, repMin, repMax, now } = input;
+  const { stepKg, sets, repMin, repMax, now, easyDay } = input;
   const all = performances(input.sessions, input.exerciseId);
   const judged = all.filter((p) => !p.reduced); // low-energy sessions are never used to judge you
 
@@ -90,7 +92,15 @@ export function recommend(input: RecommendInput): Recommendation {
     };
   }
 
-  // 2. Hit the top of the range on every set: add weight.
+  // 2. Hit the top of the range on every set: add weight (unless today is a low-energy day).
+  if (hitTop && easyDay) {
+    return {
+      kind: "build",
+      weightKg: weight,
+      targetReps: repMax,
+      message: `You hit ${repsText} at ${weight} kg last time. Low-energy day, so no weight jump today: repeat ${weight} kg.`,
+    };
+  }
   if (hitTop) {
     const up = round2(weight + stepKg);
     return {
@@ -127,12 +137,14 @@ export function recommend(input: RecommendInput): Recommendation {
 
   // 5. Somewhere in the range: same weight, bring every set up to your best set (or one more if all were equal).
   const allEqual = reps.every((r) => r === best);
-  const target = Math.min(repMax, allEqual ? best + 1 : best);
+  const target = Math.min(repMax, allEqual && !easyDay ? best + 1 : best);
   const finishNote = fullSets ? "" : ` Do all ${sets} sets this time.`;
   return {
     kind: "build",
     weightKg: weight,
     targetReps: target,
-    message: `Last time: ${repsText} at ${weight} kg. Stay at ${weight} kg and aim for ${target} reps on every set.${finishNote}`,
+    message: easyDay
+      ? `Last time: ${repsText} at ${weight} kg. Low-energy day: just match it, ${target} reps on every set.`
+      : `Last time: ${repsText} at ${weight} kg. Stay at ${weight} kg and aim for ${target} reps on every set.${finishNote}`,
   };
 }
