@@ -3,6 +3,7 @@ import {
   addSet, countDoneSets, describeSets, finishSession, formatKg, isSetComplete, lastPerformance,
   nextTemplate, removeLastSet, setField, startSession, toggleDone, totalVolumeKg,
 } from "../sessions";
+import { backupIsDue } from "../backup";
 import { READINESS_OPTIONS, isReduced, optionFor } from "../readiness";
 import type { ActiveSession, AppData, Exercise, Readiness, Session } from "../types";
 
@@ -10,9 +11,11 @@ interface Props {
   data: AppData;
   exercises: Exercise[];
   update: (change: (old: AppData) => AppData) => void;
+  /** Jump to the backup section. */
+  onBackup: () => void;
 }
 
-export function TodayScreen({ data, exercises, update }: Props) {
+export function TodayScreen({ data, exercises, update, onBackup }: Props) {
   const [summary, setSummary] = useState<Session | null>(null);
   const [feeling, setFeeling] = useState<Readiness | null>(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
@@ -50,6 +53,12 @@ export function TodayScreen({ data, exercises, update }: Props) {
     return (
       <section>
         <h1>{data.profile.name ? `Hey ${data.profile.name}` : "Today"}</h1>
+        {backupIsDue(data, new Date()) && (
+          <div className="notice">
+            <p>Your workouts are only stored on this phone. Save a backup so you can't lose them.</p>
+            <button className="small" onClick={onBackup}>Go to backup</button>
+          </div>
+        )}
         <h2>How are you feeling?</h2>
         <div className="feelings" role="group" aria-label="How are you feeling?">
           {READINESS_OPTIONS.map((o) => (

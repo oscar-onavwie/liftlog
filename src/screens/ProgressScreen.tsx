@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BackupCard } from "../components/BackupCard";
 import { StrengthChart } from "../components/StrengthChart";
 import { WeeklyChart } from "../components/WeeklyChart";
 import { exercisesWithHistory, lowEnergyCount, strengthSeries, weeklyCounts } from "../stats";
@@ -8,6 +9,7 @@ interface Props {
   data: AppData;
   exercises: Exercise[];
   update: (change: (old: AppData) => AppData) => void;
+  replaceAll: (data: AppData) => void;
 }
 
 export const GOAL_LABELS: Record<Goal, string> = {
@@ -16,7 +18,7 @@ export const GOAL_LABELS: Record<Goal, string> = {
   consistency: "Train consistently",
 };
 
-export function ProgressScreen({ data, exercises, update }: Props) {
+export function ProgressScreen({ data, exercises, update, replaceAll }: Props) {
   const now = new Date();
   const { profile, sessions } = data;
   const byId = new Map(exercises.map((e) => [e.id, e]));
@@ -123,6 +125,9 @@ export function ProgressScreen({ data, exercises, update }: Props) {
           Your weekly target drives the dashboard. Your goal is a reminder for now. Weights are shown in kg.
         </p>
       </div>
+
+      <h2 id="backup">Backup &amp; data</h2>
+      <BackupCard data={data} replaceAll={replaceAll} />
     </section>
   );
 }
